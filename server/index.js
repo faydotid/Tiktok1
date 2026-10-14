@@ -109,7 +109,10 @@ async function connectTo(raw, isRetry = false) {
   wantedUser = username;
   setStatus({ state: 'connecting', username, message: '' });
 
-  const c = new ConnectionClass(username, { enableExtendedGiftInfo: true });
+  // enableExtendedGiftInfo sengaja dimatikan: opsi itu mengambil daftar gift lewat endpoint
+  // sign Euler yang butuh paket Business ("Empty Payload ... requires a Business plan").
+  // Info gift (nama & diamond) tetap ada di event gift itu sendiri.
+  const c = new ConnectionClass(username, { enableExtendedGiftInfo: false });
   conn = c;
 
   c.on(NAME.chat, (d) => {
