@@ -7,6 +7,7 @@ import * as TLNamespace from 'tiktok-live-connector';
 const PORT = Number(process.env.PORT) || 3001;
 const HOST = process.env.HOST || '127.0.0.1';
 const AUTO_RECONNECT = process.env.AUTO_RECONNECT !== 'false';
+const DEBUG = process.env.DEBUG_CHAT === 'true';
 const GUESS_COOLDOWN_MS = Number(process.env.GUESS_COOLDOWN_MS) || 1000;
 
 const allowedOrigins = process.env.CORS_ORIGIN
@@ -71,8 +72,9 @@ function setStatus(patch) {
 
 function who(d) {
   const u = d?.user ?? d ?? {};
-  const id = u.uniqueId ?? d?.uniqueId ?? 'anon';
-  const name = u.nickname ?? d?.nickname ?? id;
+  // v2/v3 pakai user.displayId, v1 pakai uniqueId
+  const id = u.uniqueId ?? u.displayId ?? d?.uniqueId ?? u.secUid ?? u.id ?? 'anon';
+  const name = u.nickname || d?.nickname || id;
   return { id: String(id), name: String(name) };
 }
 
@@ -117,9 +119,12 @@ async function connectTo(raw, isRetry = false) {
 
   c.on(NAME.chat, (d) => {
     if (conn !== c) return;
-    const text = String(d?.comment ?? '').trim().toUpperCase();
-    if (!/^[A-Z]{5}$/.test(text)) return; // cuma tebakan 5 huruf A-Z
+    // v3: field `content`, v1/v2: field `comment`
+    const raw = String(d?.content ?? d?.comment ?? '').trim();
     const user = who(d);
+    if (DEBUG) console.log(`[chat] ${user.id}: ${raw}`);
+    const text = raw.toUpperCase();
+    if (!/^[A-Z]{5}$/.test(text)) return; // cuma tebakan 5 huruf A-Z
     const now = Date.now();
     if (now - (lastGuessAt.get(user.id) || 0) < GUESS_COOLDOWN_MS) return;
     lastGuessAt.set(user.id, now);
@@ -129,13 +134,16 @@ async function connectTo(raw, isRetry = false) {
 
   c.on(NAME.gift, (d) => {
     if (conn !== c) return;
-    const type = d?.giftType ?? d?.giftDetails?.giftType;
+    const g = d?.gift ?? d?.giftDetails ?? {};
+    const type = g.type ?? g.giftType ?? d?.giftType;
     if (type === 1 && !d?.repeatEnd) return; // gift beruntun masih jalan, tunggu selesai
-    const perGift = d?.diamondCount ?? d?.giftDetails?.diamondCount ?? 0;
+    const perGift = g.diamondCount ?? d?.diamondCount ?? 0;
+    const count = Number(d?.repeatCount) || Number(d?.comboCount) || 1;
+    if (DEBUG) console.log(`[gift] ${who(d).id}: ${g.name ?? d?.giftName} x${count}`);
     io.emit('gift', {
       ...who(d),
-      giftName: d?.giftName ?? d?.giftDetails?.giftName ?? 'Gift',
-      diamonds: perGift * (d?.repeatCount || 1),
+      giftName: g.name ?? g.giftName ?? d?.giftName ?? 'Gift',
+      diamonds: perGift * count,
     });
   });
 
