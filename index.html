@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KATLA Live</title>
+  </head>
+  <body>
+    <main id="app">
+      <header>
+        <h1 id="title">KATLA</h1>
+        <p id="subtitle"></p>
+        <div class="bar">
+          <span id="round" class="chip">Ronde 1</span>
+          <button id="pill" class="pill" type="button" title="">
+            <i class="dot"></i><span id="pill-text">TIKTOK BELUM TERHUBUNG</span>
+          </button>
+          <button id="panel-btn" class="chip btn" type="button" aria-label="Pengaturan">⚙</button>
+        </div>
+      </header>
+
+      <section id="panel" class="panel" hidden>
+        <label for="username">Username TikTok (yang lagi LIVE)</label>
+        <div class="row">
+          <input id="username" type="text" placeholder="contoh: ruhulshop" autocomplete="off" />
+          <button id="btn-connect" type="button">Hubungkan</button>
+        </div>
+        <div class="row">
+          <button id="btn-disconnect" type="button">Putuskan</button>
+          <button id="btn-skip" type="button">Kata baru</button>
+          <button id="btn-reset" type="button">Reset skor</button>
+        </div>
+      </section>
+
+      <div id="toast" class="toast" role="status"></div>
+
+      <div class="legend">
+        <span class="lg correct">Benar</span>
+        <span class="lg present">Salah posisi</span>
+        <span class="lg absent">Salah huruf</span>
+      </div>
+
+      <div id="hint" class="hint"></div>
+
+      <div id="copy" class="copy" hidden>
+        <span id="copy-text"></span>
+        <i id="copy-bar"></i>
+      </div>
+
+      <div class="board-wrap">
+        <div id="board" class="board"></div>
+      </div>
+
+      <div id="keyboard" class="keyboard"></div>
+    </main>
+
+    <section id="ov" class="ov" aria-live="polite">
+      <div class="ov-card">
+        <p id="ov-title"></p>
+        <p id="ov-word"></p>
+        <p id="ov-sub"></p>
+        <h2 class="ov-h">🏆 LEADERBOARD</h2>
+        <ol id="lb-list" class="lb"></ol>
+        <div class="ov-timer"><i id="ov-bar"></i></div>
+        <p class="ov-next">Ronde berikutnya sebentar lagi…</p>
+      </div>
+    </section>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
